@@ -1,0 +1,19 @@
+{
+  "name": "English Grammar Quest",
+  "short_name": "Grammar Quest",
+  "description": "An advanced English grammar adventure with C2 challenges and explanations.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#100d20",
+  "theme_color": "#24164d",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

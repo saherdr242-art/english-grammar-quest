@@ -1,0 +1,6 @@
+{
+  "appId": "com.englishgrammarquest.app",
+  "appName": "English Grammar Quest",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
