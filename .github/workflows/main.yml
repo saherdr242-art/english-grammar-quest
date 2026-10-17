@@ -1,4 +1,4 @@
-
+npx cap add android
 name: Build English Grammar Quest APK
 
 on:
