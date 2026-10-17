@@ -126,7 +126,32 @@ function runTimer(){stopTimer();timeLeft=timerSeconds;$("timerBadge").textConten
 function showQuestion(){answered=false;const item=queue[qi];$("worldLabel").textContent="ENGLISH LEVEL "+chosenLevel+" · GRAMMAR QUEST";$("progressLabel").textContent=`QUESTION ${qi+1}/${queue.length}`;$("streakLabel").textContent="STREAK ×"+streak;$("progressBar").style.width=(qi/queue.length*100)+"%";$("topic").textContent=item.topic.toUpperCase();$("levelBadge").textContent=chosenLevel+" CHALLENGE";$("feedback").classList.add("hidden");$("question").textContent=item.question;$("answers").innerHTML="";$("next").disabled=true;$("next").textContent=qi===queue.length-1?"VIEW RESULTS →":"NEXT QUESTION →";item.options.forEach((opt,i)=>{const b=document.createElement("button"),letter=document.createElement("span"),txt=document.createElement("span");letter.className="letter";letter.textContent=String.fromCharCode(65+i)+".";txt.textContent=opt;b.append(letter,txt);b.onclick=()=>answer(i);$("answers").appendChild(b)});runTimer()}
 function reveal(choice,timedOut=false){if(answered)return;answered=true;stopTimer();const item=queue[qi],buttons=$("answers").querySelectorAll("button");buttons.forEach((b,i)=>{b.disabled=true;if(i===item.answer)b.classList.add("correct");else if(i===choice)b.classList.add("wrong")});let pts=0;if(choice===item.answer&&!timedOut){correct++;streak++;pts=100+Math.min(streak,5)*10;earned+=pts;data.xp+=pts}else streak=0;$("streakLabel").textContent="STREAK ×"+streak;$("feedback").classList.remove("hidden");$("feedback").replaceChildren();const strong=document.createElement("strong");strong.textContent=timedOut?"⏰ Time's up!":choice===item.answer?"✓ Correct! +"+pts+" XP":"✕ Not quite.";const exp=document.createElement("p");exp.textContent=item.explanation;const ans=document.createElement("p");const label=document.createElement("strong");label.textContent="Correct answer: ";ans.append(label,document.createTextNode(String.fromCharCode(65+item.answer)+". "+item.options[item.answer]));$("feedback").append(strong,exp,ans);$("next").disabled=false;save()}
 function answer(i){reveal(i,false)}function timeoutQuestion(){reveal(-1,true)}
-function startRound(quick){stopTimer();chosenLevel=$("levelSelect").value;timerSeconds=Number($("timerSelect").value)||20;const count=quick?10:Number($("countSelect").value)||10;queue=Array.from({length:count},()=>makeQuestion(chosenLevel));qi=0;correct=0;earned=0;streak=0;lastMode=quick?"quick":"standard";show("game");showQuestion()}
+function startRound(quick){
+ stopTimer();
+ chosenLevel=$("levelSelect").value;
+ timerSeconds=Number($("timerSelect").value)||20;
+ const requestedCount=quick?10:(Number($("countSelect").value)||10);
+ queue=[];
+ const seen=new Set();
+ let attempts=0;
+ const maxAttempts=requestedCount*250;
+ // Collect different question wordings before starting the round.
+ while(queue.length<requestedCount && attempts<maxAttempts){
+   attempts++;
+   const item=makeQuestion(chosenLevel);
+   const key=item.topic+"|"+item.question.trim().toLowerCase();
+   if(!seen.has(key)){
+     seen.add(key);
+     queue.push(item);
+   }
+ }
+ qi=0;correct=0;earned=0;streak=0;lastMode=quick?"quick":"standard";
+ if(queue.length===0){alert("No questions could be generated. Please try again.");renderHome();return;}
+ if(queue.length<requestedCount){
+   alert("This level currently has "+queue.length+" different question wordings available for this round, so the round will use those questions without repeating them.");
+ }
+ show("game");showQuestion();
+}
 function finish(){stopTimer();show("result");const pct=Math.round(correct/queue.length*100);data.rounds++;data.best=Math.max(data.best,pct);save();$("resultEyebrow").textContent=chosenLevel+" RESULTS";$("resultTitle").textContent=pct>=90?"Outstanding!":pct>=70?"Great progress!":"Keep practising!";$("resultMessage").textContent=`You scored ${pct}% at ${chosenLevel}. Start another round for a fresh set of questions.`;$("resultScore").textContent=correct+"/"+queue.length;$("resultXP").textContent="+"+earned;$("resultAccuracy").textContent=pct+"%";$("resultAdvice").textContent=pct>=90?"Excellent precision. Try another level when ready.":pct>=70?"Good work. Review the explanations and keep going.":"Read each explanation, then try again with a fresh round.";$("resultDetail").textContent=`Total XP: ${data.xp}. Rounds played: ${data.rounds}. Best accuracy: ${data.best}%.`}
 $("startLevel").onclick=()=>startRound(false);$("practice").onclick=()=>startRound(true);$("next").onclick=()=>{if(!answered)return;if(qi<queue.length-1){qi++;showQuestion()}else finish()};$("quit").onclick=()=>{stopTimer();renderHome()};$("resultHome").onclick=()=>{stopTimer();renderHome()};$("again").onclick=()=>startRound(lastMode==="quick");$("reset").onclick=()=>{if(confirm("Reset your XP, rounds played and best accuracy? This cannot be undone.")){stopTimer();data={xp:0,rounds:0,best:0};save();queue=[];qi=0;correct=0;earned=0;streak=0;renderHome()}};renderHome();
 </script></body></html>
