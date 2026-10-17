@@ -21,7 +21,7 @@ main{max-width:800px;margin:auto;padding:16px 14px 40px}.hero{background:linear-
 <div class="panel settings"><label for="levelSelect">English level</label><select id="levelSelect"><option value="A1">A1 · Beginner</option><option value="A2">A2 · Elementary</option><option value="B1">B1 · Intermediate</option><option value="B2">B2 · Upper-intermediate</option><option value="C1">C1 · Advanced</option><option value="C2" selected>C2 · Proficiency</option></select>
 <label for="timerSelect">Time per question</label><select id="timerSelect"><option value="10">10 seconds · Fast</option><option value="15">15 seconds</option><option value="20" selected>20 seconds</option><option value="25">25 seconds</option><option value="30">30 seconds · Relaxed</option></select>
 <label for="countSelect">Questions per round</label><select id="countSelect"><option value="10" selected>10 questions</option><option value="20">20 questions</option><option value="40">40 questions</option></select>
-<button class="primary" id="startLevel" style="width:100%">START GRAMMAR QUEST →</button><p class="mini">Questions are generated from multiple grammar patterns and randomized scenarios. This is practice material, not an official examination.</p></div>
+<button class="primary" id="startLevel" style="width:100%">START GRAMMAR QUEST →</button><p class="mini">Questions are generated from varied grammar patterns and scenarios, with repeat avoidance across rounds on this device. Practice material, not an official examination.</p></div>
 <h2>Grammar worlds</h2><div class="worlds" id="worlds"></div>
 <div class="actions"><button id="practice">Quick 10-question challenge</button><button id="reset">Reset progress &amp; score</button></div>
 <p class="notice">Your score is saved in this browser on this device. Reset clears saved XP, rounds and best accuracy.</p></section>
@@ -45,8 +45,8 @@ const WORLDS=[
 ["👑","Champion Arena","Mixed-level challenge"]
 ];
 let chosenLevel="C2",queue=[],qi=0,correct=0,earned=0,streak=0,answered=false,timerSeconds=20,timeLeft=20,timerId=null,lastMode="standard";
-let data={xp:0,rounds:0,best:0};
-try{const saved=JSON.parse(localStorage.getItem("egqV4")||"{}");data={...data,...saved}}catch(e){}
+let data={xp:0,rounds:0,best:0,seenQuestions:[]};
+try{const saved=JSON.parse(localStorage.getItem("egqV4")||"{}");data={...data,...saved};if(!Array.isArray(data.seenQuestions))data.seenQuestions=[]}catch(e){}
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
 function q(topic,question,options,answer,explanation){return {topic,question,options,answer,explanation}}
@@ -117,7 +117,78 @@ function makePool(L){
  ]};
  return pools[L]||pools.C2;
 }
-function makeQuestion(level){let item=JSON.parse(JSON.stringify(pick(makePool(level))));const correctText=item.options[item.answer];item.options=shuffle(item.options);item.answer=item.options.indexOf(correctText);return item}
+// Procedural generator: combines many grammar patterns with varied names, places,
+// objects and time contexts. The question pool is not a fixed 8–10-item bank.
+const GEN={
+ names:["Maya","Omar","Lina","Adam","Nour","Sam","Rania","Leo","Sara","Youssef","Amira","Karim","Hana","Ziad","Farah","Tarek","Dina","Malik","Salma","Ethan","Layla","Ibrahim","Mariam","Daniel"],
+ places:["the research centre","a railway station","the conference venue","the design studio","a regional office","the university library","the city council","the production site","the medical centre","the international airport","the language school","the coastal village"],
+ objects:["the research report","a travel itinerary","the project proposal","the booking details","the safety instructions","the budget forecast","the final presentation","the customer feedback","the revised schedule","the application forms","the witness statement","the training materials"],
+ people:["the committee","the research team","the new director","the applicants","the witnesses","the engineers","the editor","the regional managers","the board","the delegates","the auditors","the organisers"]
+};
+function makeQuestion(level){
+ const pick=a=>a[Math.floor(Math.random()*a.length)], n=pick(GEN.names), n2=pick(GEN.names.filter(x=>x!==n)), place=pick(GEN.places), obj=pick(GEN.objects), group=pick(GEN.people), past=pick(["yesterday","last Friday","two days ago","last month"]), future=pick(["next Monday","next month","by Friday","later this week"]), time=pick(["before lunch","after work","on Fridays","in the evening"]), verb=pick(["review","prepare","deliver","organise","investigate","submit","analyse","negotiate"]);
+ const mk=(t,s,o,a,e)=>q(t,s,o,a,e); let item;
+ const G={
+ A1:[
+ ()=>mk("Present simple",`${n} usually _____ ${obj} ${time}.`,["prepare","prepares","preparing","prepared"],1,"Use the present simple for routines; a singular third-person subject takes -s."),
+ ()=>mk("Verb to be",`${n} _____ at ${place} today.`,["are","am","is","be"],2,"Use is with a singular subject."),
+ ()=>mk("Articles",`${n} needs _____ umbrella before leaving ${place}.`,["a","an","the a","some"],1,"Use an before a vowel sound."),
+ ()=>mk("There is / are",`There _____ ${pick(["three","four","six","several"])} copies of ${obj} on the desk.`,["is","are","am","be"],1,"Use are with plural nouns."),
+ ()=>mk("Past simple",`${n} _____ to ${place} ${past}.`,["go","goes","went","going"],2,"Use the past simple for a completed past action."),
+ ()=>mk("Prepositions",`The appointment begins _____ ${pick(["eight o'clock","half past nine","noon","midnight"])}.`,["in","on","at","from"],2,"Use at with clock times."),
+ ()=>mk("Object pronouns",`${n2} left a folder here. Please give it to _____.`,["they","their","them","theirs"],2,"Use an object pronoun after to."),
+ ()=>mk("Can",`${pick(["A dolphin","A parrot","A horse","A child"])} _____ learn new routines.`,["can","cans","is can","does can"],0,"Can is followed by the base form.")],
+ A2:[
+ ()=>mk("Present continuous",`Look! ${n} _____ ${obj} at ${place} right now.`,["checks","is checking","checked","checking"],1,"Use is + -ing for an action happening now."),
+ ()=>mk("Comparatives",`This route to ${place} is _____ than the old one.`,["more short","shorter","shortest","the shorter"],1,"Short adjectives usually take -er."),
+ ()=>mk("Countable nouns",`We don't have _____ copies of ${obj} left.`,["much","many","a little","few of"],1,"Use many with plural countable nouns."),
+ ()=>mk("Future plans",`${n} _____ visit ${place} ${future}.`,["is going to","going to","will to","is go to"],0,"Use be going to + base verb for plans."),
+ ()=>mk("Present perfect",`${n} has _____ completed ${obj}, so it is ready now.`,["yet","already","ever","last"],1,"Already often means something has happened by now."),
+ ()=>mk("Past continuous",`${n} was reviewing ${obj} when the phone _____.`,["rings","was ringing","rang","has rung"],2,"A past simple event can interrupt an ongoing past action."),
+ ()=>mk("Obligation",`Visitors _____ show identification before entering ${place}.`,["must to","have","have to","ought"],2,"Have to is followed by the base verb."),
+ ()=>mk("Adverbs",`${n} explained the instructions very _____.`,["clear","clearly","clearest","more clear"],1,"Use an adverb to describe how an action is done.")],
+ B1:[
+ ()=>mk("First conditional",`If the meeting _____ late, ${n} will contact everyone.`,["will run","runs","ran","would run"],1,"Use present simple in the if-clause of a first conditional."),
+ ()=>mk("Present perfect",`${n} _____ four versions of ${obj} this morning, and it is still morning.`,["sent","has sent","had sent","sends"],1,"Present perfect works with an unfinished time period."),
+ ()=>mk("Relative clauses",`The colleague _____ reviewed ${obj} works at ${place}.`,["which","whose","who","where"],2,"Use who for a person acting as the clause subject."),
+ ()=>mk("Gerunds",`${n} enjoys _____ new methods at work.`,["to explore","explore","exploring","explored"],2,"Enjoy is followed by a gerund."),
+ ()=>mk("Reported speech",`${n} said, “I am ready.” Later, ${n} said that they _____ ready.`,["are","were","has been","will be"],1,"In backshifted reported speech, am/is commonly changes to was."),
+ ()=>mk("Second conditional",`If I _____ more time, I'd investigate ${obj} further.`,["have","will have","had","would have"],2,"Use past simple in a second-conditional if-clause."),
+ ()=>mk("Passive voice",`${obj[0].toUpperCase()+obj.slice(1)} _____ by the team ${past}.`,["completed","was completed","has completing","is complete"],1,"Past simple passive = was/were + past participle."),
+ ()=>mk("Used to",`When ${n} worked at ${place}, they _____ commute by train every day.`,["use to","used to","was used","would to"],1,"Use used to + base verb for past habits.")],
+ B2:[
+ ()=>mk("Third conditional",`If ${n} had checked the address, they _____ to the wrong venue.`,["wouldn't go","wouldn't have gone","didn't go","hadn't gone"],1,"Third conditional: if + past perfect, would have + past participle."),
+ ()=>mk("Mixed conditionals",`If ${n} had accepted the role, they _____ at ${place} now.`,["would work","would be working","will work","had worked"],1,"A past condition can have a present result."),
+ ()=>mk("Wish and regret",`${n} wishes they _____ the earlier train ${past}.`,["caught","would catch","had caught","have caught"],2,"Wish + past perfect expresses past regret."),
+ ()=>mk("Passive reporting",`${obj[0].toUpperCase()+obj.slice(1)} is believed _____ during the inspection.`,["to lose","to have been lost","being lost","that lost"],1,"Use a perfect passive infinitive for an earlier action."),
+ ()=>mk("Inversion",`Rarely _____ such a detailed analysis of ${obj}.`,["we have seen","have we seen","we saw","did we have seen"],1,"A fronted negative adverb triggers inversion."),
+ ()=>mk("Participle clauses",`_____ all the evidence, ${n} presented the findings.`,["Considered","Having considered","Have considered","To considering"],1,"Having + past participle marks an earlier completed action."),
+ ()=>mk("Uncountable nouns",`_____ information in ${obj} needs to be checked.`,["A","An","The","Many"],2,"Information is uncountable; the identifies specific information."),
+ ()=>mk("Verb patterns",`${n} denied _____ the confidential figures.`,["to disclose","disclosing","disclose","to disclosing"],1,"Deny is followed by a gerund.")],
+ C1:[
+ ()=>mk("Inversion",`Not until the final review _____ the analysts notice the discrepancy.`,["the analysts did","did the analysts","the analysts had","had the analysts did"],1,"Fronted not until triggers inversion in the main clause."),
+ ()=>mk("Subjunctive",`The board recommended that every applicant _____ interviewed in person.`,["is","be","was","will"],1,"Formal mandative subjunctive uses the base form; passive be + past participle."),
+ ()=>mk("Concession",`_____ the proposal was costly, the committee approved it.`,["Despite","Although","In spite","However"],1,"Although is followed by a full clause."),
+ ()=>mk("Cleft sentences",`It was the wording of ${obj} _____ caused the dispute.`,["what","where","that","who"],2,"A cleft sentence commonly uses it was ... that ... ."),
+ ()=>mk("Modal deduction",`The office is locked and the lights are off. The staff _____ left already.`,["must have","should have to","can have","would rather"],0,"Must have + past participle expresses strong past deduction."),
+ ()=>mk("Passive gerund",`${n} resented _____ responsible for the error.`,["to make","being made","make","to making"],1,"Resent takes a gerund; passive gerund = being + past participle."),
+ ()=>mk("Concession",`_____ the limited evidence, the panel reached a firm conclusion.`,["Despite considering","Although considering of","Despite consider","Even considered"],0,"Despite can be followed by a noun or -ing form."),
+ ()=>mk("Dependent prepositions",`The conclusions are highly pertinent _____ the inquiry.`,["with","for","to","on"],2,"The collocation is pertinent to.")],
+ C2:[
+ ()=>mk("Future perfect continuous",`By the time the committee reconvenes, ${group} _____ ${obj} for six weeks.`,["will have been examining","will examine","are examining","have examined"],0,"Future perfect continuous emphasizes duration up to a future point."),
+ ()=>mk("Past perfect",`${n} _____ in several countries before settling near ${place}.`,["has lived","had lived","would live","has been living"],1,"Past perfect places an earlier experience before a later past event."),
+ ()=>mk("Mixed conditional",`If ${n} had heeded the warning, they _____ this crisis now.`,["aren't facing","wouldn't be facing","wouldn't have faced","won't face"],1,"A past unreal condition can explain a present consequence."),
+ ()=>mk("Negative inversion",`Not until the final witness spoke _____ the discrepancy.`,["the jury noticed","did the jury notice","the jury had noticed","noticed the jury"],1,"After fronted not until, use auxiliary-subject inversion."),
+ ()=>mk("Reporting passive",`${n} is believed _____ the proposal before the inquiry began.`,["to reject","to have rejected","rejecting","having reject"],1,"Use to have + past participle for an earlier action."),
+ ()=>mk("Causative have",`The director had ${obj} _____.`,["to audit","auditing","audited","audit"],2,"Have something done uses object + past participle."),
+ ()=>mk("Collocations",`The new evidence casts _____ on the reliability of the original account.`,["doubt","suspicion","questioning","hesitation"],0,"The established collocation is cast doubt on."),
+ ()=>mk("Subjunctive",`The chair insisted that every delegate _____ the declaration in person.`,["signs","signed","sign","has signed"],2,"Formal English uses the base-form subjunctive after insist expressing a demand."),
+ ()=>mk("Dependent prepositions",`The account is entirely consistent _____ the available evidence.`,["to","with","for","about"],1,"The standard collocation is consistent with."),
+ ()=>mk("Inversion",`No sooner _____ the announcement than the markets reacted sharply.`,["the company made","had the company made","did the company made","the company had made"],1,"No sooner ... than takes inversion, usually with the past perfect.")]
+ };
+ item=pick(G[level]||G.C2)();
+ const correctText=item.options[item.answer]; item.options=shuffle(item.options); item.answer=item.options.indexOf(correctText); return item;
+}
 function save(){try{localStorage.setItem("egqV4",JSON.stringify(data))}catch(e){}}
 function show(section){["home","game","result"].forEach(id=>$(id).classList.toggle("hidden",id!==section))}
 function renderHome(){show("home");$("xp").textContent=data.xp;$("rounds").textContent=data.rounds;$("best").textContent=data.best+"%";$("worlds").innerHTML="";WORLDS.forEach((w,i)=>{const b=document.createElement("button");b.className="world";b.innerHTML=`<span>${w[0]} <small>WORLD ${i+1}</small></span><strong>${w[1]}</strong><small>${w[2]}</small>`;b.onclick=()=>{$("levelSelect").value=["A1","A2","B1","B2","C1","C2"][Math.min(5,i)];startRound(false)};$("worlds").appendChild(b)})}
@@ -132,19 +203,17 @@ function startRound(quick){
  timerSeconds=Number($("timerSelect").value)||20;
  const requestedCount=quick?10:(Number($("countSelect").value)||10);
  queue=[];
- const seen=new Set();
+ const seen=new Set(), historic=new Set(data.seenQuestions||[]);
  let attempts=0;
- const maxAttempts=requestedCount*250;
- // Collect different question wordings before starting the round.
+ const maxAttempts=requestedCount*1800;
+ // Avoid repeated questions within a round and across recent rounds on this device.
  while(queue.length<requestedCount && attempts<maxAttempts){
    attempts++;
    const item=makeQuestion(chosenLevel);
-   const key=item.topic+"|"+item.question.trim().toLowerCase();
-   if(!seen.has(key)){
-     seen.add(key);
-     queue.push(item);
-   }
+   const key=chosenLevel+"|"+item.topic+"|"+item.question.trim().toLowerCase();
+   if(!seen.has(key) && !historic.has(key)){seen.add(key);historic.add(key);queue.push(item)}
  }
+ data.seenQuestions=[...historic].slice(-12000);
  qi=0;correct=0;earned=0;streak=0;lastMode=quick?"quick":"standard";
  if(queue.length===0){alert("No questions could be generated. Please try again.");renderHome();return;}
  if(queue.length<requestedCount){
@@ -153,5 +222,5 @@ function startRound(quick){
  show("game");showQuestion();
 }
 function finish(){stopTimer();show("result");const pct=Math.round(correct/queue.length*100);data.rounds++;data.best=Math.max(data.best,pct);save();$("resultEyebrow").textContent=chosenLevel+" RESULTS";$("resultTitle").textContent=pct>=90?"Outstanding!":pct>=70?"Great progress!":"Keep practising!";$("resultMessage").textContent=`You scored ${pct}% at ${chosenLevel}. Start another round for a fresh set of questions.`;$("resultScore").textContent=correct+"/"+queue.length;$("resultXP").textContent="+"+earned;$("resultAccuracy").textContent=pct+"%";$("resultAdvice").textContent=pct>=90?"Excellent precision. Try another level when ready.":pct>=70?"Good work. Review the explanations and keep going.":"Read each explanation, then try again with a fresh round.";$("resultDetail").textContent=`Total XP: ${data.xp}. Rounds played: ${data.rounds}. Best accuracy: ${data.best}%.`}
-$("startLevel").onclick=()=>startRound(false);$("practice").onclick=()=>startRound(true);$("next").onclick=()=>{if(!answered)return;if(qi<queue.length-1){qi++;showQuestion()}else finish()};$("quit").onclick=()=>{stopTimer();renderHome()};$("resultHome").onclick=()=>{stopTimer();renderHome()};$("again").onclick=()=>startRound(lastMode==="quick");$("reset").onclick=()=>{if(confirm("Reset your XP, rounds played and best accuracy? This cannot be undone.")){stopTimer();data={xp:0,rounds:0,best:0};save();queue=[];qi=0;correct=0;earned=0;streak=0;renderHome()}};renderHome();
+$("startLevel").onclick=()=>startRound(false);$("practice").onclick=()=>startRound(true);$("next").onclick=()=>{if(!answered)return;if(qi<queue.length-1){qi++;showQuestion()}else finish()};$("quit").onclick=()=>{stopTimer();renderHome()};$("resultHome").onclick=()=>{stopTimer();renderHome()};$("again").onclick=()=>startRound(lastMode==="quick");$("reset").onclick=()=>{if(confirm("Reset your XP, rounds played and best accuracy? This cannot be undone.")){stopTimer();data={xp:0,rounds:0,best:0,seenQuestions:[]};save();queue=[];qi=0;correct=0;earned=0;streak=0;renderHome()}};renderHome();
 </script></body></html>
