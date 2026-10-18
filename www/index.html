@@ -1,1 +1,227 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#24164d">
+<meta name="description" content="English Grammar Quest: randomized A1-C2 grammar practice with explanations, timers and progress tracking.">
+<title>English Grammar Quest</title>
+<style>
+:root{color-scheme:dark;--bg:#100d20;--panel:#1c1731;--panel2:#272044;--text:#f8f5ff;--muted:#b8afcf;--purple:#a78bfa;--border:#40365f;--green:#39d6a0;--red:#ff8795}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#30205a,var(--bg) 55%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{max-width:800px;margin:auto;padding:16px 14px 40px}.hero{background:linear-gradient(135deg,#201447,#5235a3 60%,#a15bd4);padding:23px;border-radius:22px;box-shadow:0 14px 45px #0003}.eyebrow{font-size:11px;letter-spacing:2px;font-weight:800;opacity:.85}h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:10px 0}h2{margin:12px 0 7px}p{line-height:1.55}.muted{color:var(--muted);font-size:13px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.stat,.panel{border:1px solid var(--border);border-radius:15px;padding:13px;background:#1a1530dd}.num{font-size:23px;font-weight:850}.pill{display:inline-block;border:1px solid var(--border);padding:4px 9px;border-radius:30px;font-size:11px;margin:2px}button,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--border);padding:12px;border-radius:12px;cursor:pointer}button:focus-visible,select:focus-visible{outline:3px solid var(--purple)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#7952d5;border-color:#9471ed;font-weight:800;text-align:center}.worlds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}.world{text-align:left;min-height:90px}.world strong{display:block;margin:6px 0}.world small{color:var(--muted)}.world.selected{border:2px solid var(--purple)}.bar,.timerTrack{height:7px;background:var(--border);border-radius:9px;overflow:hidden;margin:10px 0 14px}.bar span,.timerTrack span{display:block;height:100%;background:var(--purple);width:0;transition:width .2s linear}.timerTrack span{width:100%;background:var(--green)}.timerTrack span.low{background:var(--red)}.qtop{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px}.question{font-size:clamp(19px,4vw,24px);font-weight:750;line-height:1.45;margin:20px 0}.answers{display:grid;gap:9px}.answers button{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--panel);width:100%}.letter{font-weight:900;color:var(--purple);min-width:22px}.correct{border-color:var(--green)!important;background:#17372f!important}.wrong{border-color:var(--red)!important;background:#3a202d!important}.feedback{padding:14px;border-radius:13px;background:var(--panel2);margin-top:13px;line-height:1.6}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.actions button{flex:1}.hidden{display:none!important}.notice{font-size:12px;color:var(--muted);margin-top:16px}.resultHero{margin-bottom:14px}label{display:block;font-size:13px;font-weight:700;margin:10px 0 6px}select{display:block;width:100%;margin-bottom:12px}.settings{margin-top:14px}.mini{font-size:12px;color:var(--muted)}
+@media(max-width:480px){main{padding:12px}.hero{padding:20px}.worlds{grid-template-columns:1fr}.world{min-height:72px}.stats{gap:6px}.stat{padding:10px}.num{font-size:20px}}
+</style>
+</head>
+<body><main>
+<section class="hero"><div class="eyebrow">A1–C2 · YOUR PERSONAL GRAMMAR ADVENTURE</div><h1>ENGLISH GRAMMAR<br>QUEST</h1><p>Master the language. Outsmart the traps. Build your confidence one question at a time.</p><span class="pill">6 LEVELS</span><span class="pill">RANDOMIZED ROUNDS</span><span class="pill">INSTANT EXPLANATIONS</span></section>
+<section id="home">
+<div class="stats"><div class="stat"><div class="num" id="xp">0</div><div class="muted">TOTAL XP</div></div><div class="stat"><div class="num" id="rounds">0</div><div class="muted">ROUNDS PLAYED</div></div><div class="stat"><div class="num" id="best">0%</div><div class="muted">BEST ACCURACY</div></div></div>
+<h2>Choose your level</h2><p class="muted">Each round draws from a larger level-specific question bank, varies scenarios, and shuffles answer choices. Duplicate question wording is filtered within each round.</p>
+<div class="panel settings"><label for="levelSelect">English level</label><select id="levelSelect"><option value="A1">A1 · Beginner</option><option value="A2">A2 · Elementary</option><option value="B1">B1 · Intermediate</option><option value="B2">B2 · Upper-intermediate</option><option value="C1">C1 · Advanced</option><option value="C2" selected>C2 · Proficiency</option></select>
+<label for="timerSelect">Time per question</label><select id="timerSelect"><option value="10">10 seconds · Fast</option><option value="15">15 seconds</option><option value="20" selected>20 seconds</option><option value="25">25 seconds</option><option value="30">30 seconds · Relaxed</option></select>
+<label for="countSelect">Questions per round</label><select id="countSelect"><option value="10" selected>10 questions</option><option value="20">20 questions</option><option value="40">40 questions</option></select>
+<button class="primary" id="startLevel" style="width:100%">START GRAMMAR QUEST →</button><p class="mini">Questions are selected from a varied grammar bank and randomized scenarios. Repeated wording is prevented within each round when enough unique items are available. This is practice material, not an official examination.</p></div>
+<h2>Grammar worlds</h2><div class="worlds" id="worlds"></div>
+<div class="actions"><button id="practice">Quick 10-question challenge</button><button id="reset">Reset progress &amp; score</button></div>
+<p class="notice">Your score is saved in this browser on this device. Reset clears saved XP, rounds and best accuracy.</p></section>
+<section id="game" class="hidden"><div class="qtop"><span id="worldLabel"></span><span id="progressLabel"></span><span id="streakLabel"></span></div><div class="bar"><span id="progressBar"></span></div><div class="timerTrack"><span id="timerBar"></span></div><span class="pill" id="topic"></span><span class="pill" id="levelBadge"></span><span class="pill" id="timerBadge"></span><div class="question" id="question"></div><div class="answers" id="answers"></div><div id="feedback" class="feedback hidden" aria-live="polite"></div><div class="actions"><button id="quit">← Home</button><button class="primary" id="next" disabled>NEXT QUESTION →</button></div></section>
+<section id="result" class="hidden"><div class="hero resultHero"><div class="eyebrow" id="resultEyebrow"></div><h2 id="resultTitle"></h2><p id="resultMessage"></p></div><div class="stats"><div class="stat"><div class="num" id="resultScore"></div><div class="muted">CORRECT</div></div><div class="stat"><div class="num" id="resultXP"></div><div class="muted">XP EARNED</div></div><div class="stat"><div class="num" id="resultAccuracy"></div><div class="muted">ACCURACY</div></div></div><div class="panel"><strong id="resultAdvice"></strong><p class="muted" id="resultDetail"></p></div><div class="actions"><button id="resultHome">Home</button><button class="primary" id="again">Play a fresh round</button></div></section>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const PEOPLE=["Maya","Omar","Lina","Adam","Nour","Sam","Rania","Leo","Sara","Youssef","Amira","Karim","Hana","Ziad"];
+const PLACES=["the library","the office","the airport","the café","the station","the museum","the classroom","the hotel","the market","the clinic","the sports centre","the university"];
+const THINGS=["the report","the tickets","the homework","the invitations","the application","the final draft","the schedule","the results"];
+const WORLDS=[
+["⌛","Tense Labyrinth","Tenses, time expressions and aspect"],
+["⛰️","Conditionals Canyon","Real, unreal and mixed conditions"],
+["🏰","Inversion Citadel","Emphasis and negative adverbials"],
+["🗼","Voice & Speech Tower","Passive voice and reported speech"],
+["🧭","Vocabulary Isles","Collocations, idioms and precise word choice"],
+["📜","Syntax Sanctum","Verb patterns, clauses and subjunctive"],
+["❄️","Preposition Peaks","Prepositions and common structures"],
+["👑","Champion Arena","Mixed-level challenge"]
+];
+let chosenLevel="C2",queue=[],qi=0,correct=0,earned=0,streak=0,answered=false,timerSeconds=20,timeLeft=20,timerId=null,lastMode="standard";
+let data={xp:0,rounds:0,best:0};
+try{const saved=JSON.parse(localStorage.getItem("egqV4")||"{}");data={...data,...saved}}catch(e){}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
+function q(topic,question,options,answer,explanation){return {topic,question,options,answer,explanation}}
+function makePool(L){
+ const name=pick(PEOPLE),other=pick(PEOPLE.filter(x=>x!==name)),place=pick(PLACES),thing=pick(THINGS),person=pick(PEOPLE);
+ const pools={
+ A1:[
+ q("Present simple",`${name} usually _____ English after dinner.`,["study","studies","studying","studied"],1,"Use the present simple for routines. With he, she or a singular name, add -s or -es."),
+ q("Verb to be",`${name} _____ at the library today.`,["are","am","is","be"],2,"Use is with a singular subject such as a person's name."),
+ q("Articles",`${name} has _____ umbrella in the bag.`,["a","an","the a","some"],1,"Use an before a vowel sound: an umbrella."),
+ q("There is / are",`There _____ three books on the desk.`,["is","are","am","be"],1,"Use there are with plural nouns."),
+ q("Past simple",`${name} _____ to ${place} yesterday.`,["go","goes","went","going"],2,"Use the past simple for a completed action at a finished past time."),
+ q("Prepositions",`The lesson starts _____ nine o'clock.`,["in","on","at","from"],2,"Use at with specific clock times."),
+ q("Object pronouns",`This is ${other}'s phone. Please give it to _____.`,["they","their","them","theirs"],2,"Use an object pronoun after give and the preposition to."),
+ q("Can",`A bird _____ fly, but a fish cannot.`,["can","cans","is can","does can"],0,"Can is followed by the base form of the verb."),
+ q("Plural nouns",`There are two _____ on the table.`,["child","childs","children","childrens"],2,"The plural of child is children."),
+ q("Possessives",`That is _____ bag; it belongs to Maya.`,["Maya","Mayas","Maya's","Mayas'"],2,"Use apostrophe + s to show singular possession."),
+ q("Present simple questions",`_____ Omar work near the station?`,["Do","Does","Is","Has"],1,"Use does with he, she, it, or a singular name in present-simple questions."),
+ q("Negatives",`${name} _____ drink coffee in the evening.`,["don't","doesn't","isn't","not"],1,"Use doesn't + base verb with a singular third-person subject."),
+ q("Prepositions of place",`The keys are _____ the drawer.`,["at","in","on","to"],1,"Use in when something is inside a container or space."),
+ q("Demonstratives",`_____ shoes here are mine.`,["This","That","These","It"],2,"Use these with plural nouns near the speaker."),
+ q("Imperatives",`Please _____ the window; it is cold.`,["close","closes","closing","to close"],0,"Use the base form of the verb in an imperative."),
+ q("Have got",`${name} _____ two sisters.`,["have got","has got","is got","got has"],1,"Use has got with a singular third-person subject."),
+ q("Frequency adverbs",`${name} is _____ late for class; arriving late is unusual.`,["never","always","usually","often"],0,"Never means not at any time and matches the clue that lateness is unusual."),
+ q("Countable nouns",`I'd like _____ apple, please.`,["a","an","some","any"],1,"Use an before the vowel sound in apple."),
+ q("Past of be",`Yesterday, the classrooms _____ empty.`,["was","were","are","be"],1,"Use were with plural subjects in the past."),
+ q("Like + -ing",`${name} enjoys _____ music after work.`,["listen","listens","listening to","to listening"],2,"Enjoy is followed by an -ing form; listen takes to before an object."),
+ ],
+ A2:[
+ q("Present continuous",`Look! ${name} _____ for the bus right now.`,["waits","is waiting","waited","waiting"],1,"Use am/is/are + -ing for an action happening now."),
+ q("Comparatives",`This route is _____ than the old one.`,["more short","shorter","shortest","the shorter"],1,"Short is a short adjective, so its comparative is shorter."),
+ q("Countable nouns",`We don't have _____ eggs left.`,["much","many","a little","few of"],1,"Use many with plural countable nouns."),
+ q("Future plans",`${name} _____ visit a cousin next weekend.`,["is going to","going to","will to","is go to"],0,"Use am/is/are going to + base verb for plans."),
+ q("Present perfect",`I have _____ finished the email, so I can send it now.`,["yet","already","ever","last"],1,"Already often indicates that something has happened by now."),
+ q("Past continuous",`I was cooking when the phone _____.`,["rings","was ringing","rang","has rung"],2,"A past-simple event can interrupt an action in progress."),
+ q("Obligation",`You _____ wear a seat belt by law.`,["must to","have","have to","ought"],2,"Have to is followed by the base verb."),
+ q("Adverbs",`${name} speaks English very _____.`,["good","well","best","betterly"],1,"Use well, an adverb, to describe how someone speaks."),
+ q("Too / enough",`This box is _____ heavy for me to lift alone.`,["enough","too","so much","many"],1,"Too + adjective means more than is manageable in this context."),
+ q("First conditional",`If it _____ tomorrow, we'll stay at home.`,["will rain","rains","rained","would rain"],1,"Use present simple in the if-clause of a first conditional."),
+ q("Present perfect with for",`${name} has lived here _____ 2021.`,["for","since","during","from"],1,"Use since with the starting point of a period."),
+ q("Infinitives",`We decided _____ the museum on Saturday.`,["visit","visiting","to visit","visited"],2,"Decide is followed by a to-infinitive."),
+ q("Past simple negative",`${name} _____ the message yesterday.`,["didn't see","doesn't saw","didn't saw","not saw"],0,"Use didn't + base verb for past-simple negatives."),
+ q("Superlatives",`That was the _____ film I've ever seen.`,["funny","funnier","funniest","most funny"],2,"The usual superlative of funny is funniest."),
+ q("Quantifiers",`There is _____ milk left, so we can make tea.`,["a few","a little","many","few"],1,"Use a little with uncountable nouns such as milk."),
+ q("Should",`You look tired. You _____ get some rest.`,["should","should to","are should","must to"],0,"Should is followed directly by the base verb to give advice."),
+ q("Articles",`We stayed at _____ hotel near the airport.`,["a","an","the an","some"],0,"Use a before hotel because its initial h is pronounced."),
+ q("Relative pronouns",`The man _____ lives next door is a doctor.`,["which","who","where","whose"],1,"Use who for a person acting as the subject of a relative clause."),
+ q("Verb patterns",`${name} wants _____ a new language.`,["learn","learning","to learn","learned"],2,"Want is followed by a to-infinitive."),
+ q("Adverbs of manner",`Please drive _____. The roads are icy.`,["careful","carefully","care","more careful"],1,"Use an adverb such as carefully to modify drive."),
+ ],
+ B1:[
+ q("First conditional",`If the train _____ late, we'll take a taxi.`,["will be","is","was","would be"],1,"Use present simple in the if-clause and will in the result clause."),
+ q("Present perfect",`${name} _____ three emails this morning, and it is still morning.`,["sent","has sent","had sent","sends"],1,"Present perfect can describe completed actions in an unfinished time period."),
+ q("Relative clauses",`The woman _____ helped me at the station was very kind.`,["which","whose","who","where"],2,"Use who for a person acting as the subject of a relative clause."),
+ q("Gerunds",`${name} enjoys _____ new recipes at weekends.`,["to try","try","trying","tried"],2,"Enjoy is followed by a gerund (-ing form)."),
+ q("Reported speech",`${name} said, “I am tired.” Later, ${name} said that they _____ tired.`,["are","were","has been","will be"],1,"In standard backshifted reported speech, am/is changes to was."),
+ q("Second conditional",`If I _____ more free time, I'd learn another language.`,["have","will have","had","would have"],2,"Use the past simple in the if-clause of a second conditional."),
+ q("Passive voice",`The new bridge _____ in 2024.`,["built","was built","has building","is build"],1,"Past simple passive = was/were + past participle."),
+ q("Used to",`When ${name} was younger, they _____ play football every day.`,["use to","used to","was used","would to"],1,"Use used to + base verb for past habits that no longer happen."),
+ q("Present perfect continuous",`${name} _____ for the exam all afternoon and needs a break.`,["studies","has been studying","studied","is study"],1,"Use the present perfect continuous for an activity continuing over a period up to now."),
+ q("Second conditional",`If we _____ closer to the sea, we would swim every day.`,["live","lived","will live","would live"],1,"Use the past simple after if in a second conditional."),
+ q("Reported questions",`“Where do you work?” she asked me. She asked me where I _____.`,["do I work","worked","did I work","work am"],1,"Reported questions use statement word order; present often backshifts to past."),
+ q("Modal advice",`You _____ have told me earlier; I could have helped.`,["should","should to","must to","would"],0,"Should have + past participle expresses past advice or criticism."),
+ q("Gerund after preposition",`${name} is interested in _____ abroad.`,["work","to work","working","worked"],2,"A verb after a preposition normally takes the -ing form."),
+ q("Past perfect",`By the time we arrived, the film _____.`,["already starts","has already started","had already started","was already start"],2,"Use past perfect for an event completed before another past event."),
+ q("Passive voice",`All applications _____ by Friday afternoon.`,["must submit","must be submitted","must submitted","must be submitting"],1,"Modal passive: modal + be + past participle."),
+ q("Wish",`I wish I _____ so much money on that jacket last week.`,["didn't spend","haven't spent","hadn't spent","wouldn't spend"],2,"Wish + past perfect expresses regret about a past action."),
+ q("Phrasal verbs",`Could you _____ the volume? I can't hear the dialogue.`,["turn up","turn into","turn over","turn out"],0,"Turn up means increase the volume."),
+ q("Articles",`${name} hopes to become _____ engineer.`,["a","an","the","no article"],1,"Use an before a vowel sound in engineer."),
+ q("Future forms",`Don't call at eight; I _____ dinner then.`,["will have","will be having","have had","am have"],1,"Use future continuous for an action in progress at a future time."),
+ q("Verb patterns",`The teacher made us _____ the exercise again.`,["to do","doing","do","did"],2,"Make + object takes the bare infinitive in active clauses."),
+ ],
+ B2:[
+ q("Third conditional",`If ${name} had checked the address, they _____ to the wrong hotel.`,["wouldn't go","wouldn't have gone","didn't go","hadn't gone"],1,"Third conditional: if + past perfect, would have + past participle."),
+ q("Mixed conditionals",`If ${name} had accepted the job, they _____ in London now.`,["would live","would be living","will live","had lived"],1,"A past condition can have a present result: would be living now."),
+ q("Wish and regret",`${name} wishes they _____ the earlier train yesterday.`,["caught","would catch","had caught","have caught"],2,"Wish + past perfect expresses regret about a past event."),
+ q("Passive reporting",`The missing files are believed _____ abroad.`,["to take","to have been taken","being taken","that taken"],1,"Use the perfect passive infinitive for an earlier action."),
+ q("Inversion",`Rarely _____ such a well-organised event.`,["we have seen","have we seen","we saw","did we have seen"],1,"A fronted negative adverb such as rarely triggers inversion."),
+ q("Participle clauses",`_____ all the evidence, the jury reached a decision.`,["Considered","Having considered","Have considered","To considering"],1,"Having + past participle shows an action completed before the main action."),
+ q("Uncountable nouns",`_____ information in this report is confidential.`,["A","An","The","Many"],2,"The identifies specific information; information is uncountable."),
+ q("Verb patterns",`The manager denied _____ the confidential document.`,["to leak","leaking","leak","to leaking"],1,"Deny is followed by a gerund."),
+ q("Concession",`_____ being exhausted, the team completed the project.`,["Although","Despite","However","Even"],1,"Despite is followed by a noun or -ing form, not a finite clause."),
+ q("Modal deduction",`The ground is soaked; it _____ during the night.`,["must rain","must have rained","should rain","can have rain"],1,"Must have + past participle expresses a strong deduction about the past."),
+ q("Future perfect",`By next June, I _____ here for ten years.`,["will work","will have worked","worked","have worked"],1,"Use future perfect for an amount of time completed by a future point."),
+ q("Causative",`We had the kitchen _____ last month.`,["renovate","renovating","renovated","to renovate"],2,"Have + object + past participle describes arranging for a service."),
+ q("Reported speech",`He denied _____ the confidential email.`,["to send","sending","send","to sending"],1,"Deny is followed by an -ing form."),
+ q("Relative clauses",`The proposal, _____ was revised twice, was finally approved.`,["that","what","which","who"],2,"Use which in a non-defining relative clause; do not use that after a comma."),
+ q("Advanced conditionals",`Were the company _____ the contract, it would face a penalty.`,["breach","to breach","breaching to","breached to"],1,"Were + subject + to-infinitive is a formal hypothetical conditional."),
+ q("Inversion",`Only after the meeting _____ the scale of the problem.`,["we understood","did we understand","we did understood","understood we"],1,"Only + a fronted time expression triggers inversion in the main clause."),
+ q("Dependent prepositions",`The new policy is designed to prevent employees _____ sharing passwords.`,["against","from","to","of"],1,"Prevent someone from doing something is the standard pattern."),
+ q("Articles",`She has _____ excellent understanding of phonetics.`,["a","an","the a","no article"],1,"Use an before the vowel sound at the start of excellent."),
+ q("Participle clauses",`_____ by the unexpected result, the researchers repeated the experiment.`,["Surprising","Surprised","Having surprise","Were surprised"],1,"Use the past participle Surprised to describe how the researchers felt."),
+ q("Collocations",`We need to _____ a decision before noon.`,["do","make","take up","set"],1,"The standard collocation is make a decision."),
+ ],
+ C1:[
+ q("Inversion",`Not until the final review _____ the team notice the error.`,["the team did","did the team","the team had","had the team did"],1,"Fronted not until triggers inversion in the main clause."),
+ q("Subjunctive",`The board recommended that every applicant _____ interviewed in person.`,["is","be","was","will"],1,"Formal mandative subjunctive uses the base form; passive: be + past participle."),
+ q("Concession",`_____ the proposal was expensive, it was approved unanimously.`,["Despite","Although","In spite","However"],1,"Although is followed by a full clause with a subject and verb."),
+ q("Cleft sentences",`It was the final paragraph _____ caused the disagreement.`,["what","where","that","who"],2,"A cleft sentence commonly uses It was ... that ... to focus information."),
+ q("Modal deduction",`The lights are off and nobody answers. The occupants _____ gone out.`,["must have","should have to","can have","would rather"],0,"Must have + past participle expresses a strong deduction about the past; the subject clearly refers to people."),
+ q("Passive gerund",`${name} resented _____ responsible for the entire project.`,["to be made","being made","make","to making"],1,"Resent is followed by a gerund; the passive gerund is being + past participle."),
+ q("Concession",`_____ the risks, the director approved the plan.`,["Despite understanding","Although understood","Despite understand","Even understood"],0,"Despite is followed by a noun or -ing form, not a full finite clause."),
+ q("Dependent prepositions",`The findings are highly pertinent _____ the investigation.`,["with","for","to","on"],2,"The correct adjective-preposition collocation is pertinent to."),
+ q("Inversion",`Under no circumstances _____ confidential data with outsiders.`,["you should share","should you share","you share should","you should to share"],1,"A negative adverbial at the beginning requires subject-auxiliary inversion."),
+ q("Mandative subjunctive",`It is essential that each witness _____ available for questioning.`,["is","be","was","will be"],1,"After essential that, formal English can use the base-form subjunctive."),
+ q("Concession",`Much _____ I respect her expertise, I disagree with her conclusion.`,["although","as","despite","however"],1,"Much as means although or even though in a formal concessive clause."),
+ q("Participle clauses",`_____ the limitations, the team interpreted the results cautiously.`,["Recognising","Recognised","To recognising","Having recognise"],0,"The -ing participle introduces an action or circumstance linked to the main clause."),
+ q("Ellipsis",`The first proposal was costly, and the second was _____ .`,["too","also costly","as well as","so much"],0,"Too can mean that the second proposal was costly as well."),
+ q("Nominalisation",`The committee's _____ to disclose the data caused concern.`,["refuse","refusal","refusing to","refused"],1,"The noun refusal fits the possessive determiner and the phrase structure."),
+ q("Cleft sentences",`What the reviewers objected to _____ the lack of supporting evidence.`,["were","was","have been","are"],1,"A what-cleft clause functioning as the subject commonly takes a singular verb here."),
+ q("Advanced collocations",`The report falls _____ of the standard required by the regulator.`,["short","brief","low","small"],0,"Fall short of means fail to reach a standard or target."),
+ q("Inversion",`Seldom _____ such a comprehensive analysis.`,["we encounter","do we encounter","we do encountered","encountered we"],1,"Seldom at the beginning triggers auxiliary-subject inversion."),
+ q("Verb patterns",`The witness distinctly remembered _____ the door before leaving.`,["to lock","lock","locking","to locking"],2,"Remember + -ing refers to recalling a past action."),
+ q("Prepositions",`The decision is contingent _____ approval from the board.`,["of","to","on","with"],2,"The standard expression is contingent on."),
+ q("Formal register",`The findings lend _____ to the hypothesis.`,["support","supporting","supported","a support to"],0,"Lend support to is the standard collocation."),
+ ],
+ C2:[
+ q("Future perfect continuous",`By the time the committee reconvenes, the auditors _____ the accounts for six weeks.`,["will have been examining","will examine","are examining","have examined"],0,"The future perfect continuous emphasizes duration up to a future reference point."),
+ q("Past perfect",`${name} _____ in three countries before settling in Lisbon.`,["has lived","had lived","would live","has been living"],1,"The past perfect places the earlier period before the later past event of settling in Lisbon."),
+ q("Mixed conditional",`If ${name} had heeded the warning, they _____ facing this crisis now.`,["aren't","wouldn't be","wouldn't have been","won't be"],1,"A past unreal condition can explain a present consequence."),
+ q("Negative inversion",`Not until the final witness spoke _____ the discrepancy.`,["the jury noticed","did the jury notice","the jury had noticed","noticed the jury"],1,"After fronted not until, the main clause uses auxiliary-subject inversion."),
+ q("Reporting passive",`The minister is believed _____ the proposal before the inquiry began.`,["to reject","to have rejected","rejecting","having reject"],1,"Use to have + past participle for an action earlier than the reporting time."),
+ q("Causative have",`We had the entire database _____ after the security breach.`,["to audit","auditing","audited","audit"],2,"Have something done uses object + past participle."),
+ q("Collocations",`The findings cast _____ on the reliability of the original survey.`,["doubt","suspicion","questioning","hesitation"],0,"The established collocation is cast doubt on."),
+ q("Subjunctive",`The chair insisted that every applicant _____ the declaration in person.`,["signs","signed","sign","has signed"],2,"After insist expressing a demand, formal English uses the base-form subjunctive."),
+ q("Dependent prepositions",`Her account is entirely consistent _____ the forensic evidence.`,["to","with","for","about"],1,"The standard collocation is consistent with."),
+ q("Inversion",`No sooner _____ the announcement than the markets reacted sharply.`,["the company made","had the company made","did the company made","the company had made"],1,"No sooner ... than takes inversion, usually with the past perfect."),
+ q("Concessive inversion",`_____ the evidence may appear compelling, alternative explanations remain possible.`,["Much as","Despite","However","In spite"],0,"Much as introduces a concessive clause followed by a subject and verb."),
+ q("Advanced collocations",`The findings are at variance _____ the conclusions of the earlier study.`,["to","with","from","against"],1,"At variance with means in conflict or disagreement with."),
+ q("Subjunctive",`The judge ordered that the document _____ immediately.`,["is produced","be produced","was producing","will produce"],1,"The formal mandative subjunctive uses be + past participle in the passive."),
+ q("Inversion",`Little _____ that the decision would reshape the entire industry.`,["they knew","did they know","they did knew","knew they"],1,"Little at the beginning of a clause triggers subject-auxiliary inversion."),
+ q("Perfect infinitive",`She seems _____ the implications before anyone else raised them.`,["to understand","to have understood","understanding","having understand"],1,"Use a perfect infinitive for an action that occurred before the time of seeming."),
+ q("Participle clauses",`_____ no reliable data, the analysts declined to draw a firm conclusion.`,["Having","Having had","To have","Had been"],1,"Having had + noun indicates the prior absence of something; the clause shares its subject with the main clause."),
+ q("Precise word choice",`The claim is not merely implausible but fundamentally _____.`,["untenable","inattentive","invaluable","unattended"],0,"Untenable means impossible to defend or justify, fitting the context of a claim."),
+ q("Nominal clauses",`The question remains _____ the figures were deliberately altered.`,["that","whether","what","which"],1,"Whether introduces an indirect yes/no question after remains."),
+ q("Dependent prepositions",`The evidence is germane _____ the central issue under review.`,["with","for","to","on"],2,"Germane to means relevant to."),
+ q("Inversion",`Only when the final audit was complete _____ the discrepancy become apparent.`,["the discrepancy did","did the discrepancy","the discrepancy had","had the discrepancy did"],1,"Only when at the start triggers inversion in the main clause."),
+ ]};
+ return pools[L]||pools.C2;
+}
+function makeQuestion(level){let item=JSON.parse(JSON.stringify(pick(makePool(level))));const correctText=item.options[item.answer];item.options=shuffle(item.options);item.answer=item.options.indexOf(correctText);return item}
+function save(){try{localStorage.setItem("egqV4",JSON.stringify(data))}catch(e){}}
+function show(section){["home","game","result"].forEach(id=>$(id).classList.toggle("hidden",id!==section))}
+function renderHome(){show("home");$("xp").textContent=data.xp;$("rounds").textContent=data.rounds;$("best").textContent=data.best+"%";$("worlds").innerHTML="";WORLDS.forEach((w,i)=>{const b=document.createElement("button");b.className="world";b.innerHTML=`<span>${w[0]} <small>WORLD ${i+1}</small></span><strong>${w[1]}</strong><small>${w[2]}</small>`;b.onclick=()=>{$("levelSelect").value=["A1","A2","B1","B2","C1","C2"][Math.min(5,i)];startRound(false)};$("worlds").appendChild(b)})}
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function runTimer(){stopTimer();timeLeft=timerSeconds;$("timerBadge").textContent=timeLeft+"s";$("timerBar").style.width="100%";$("timerBar").classList.remove("low");timerId=setInterval(()=>{timeLeft--;$("timerBadge").textContent=timeLeft+"s";$("timerBar").style.width=Math.max(0,timeLeft/timerSeconds*100)+"%";if(timeLeft<=5)$("timerBar").classList.add("low");if(timeLeft<=0){stopTimer();if(!answered)timeoutQuestion()}},1000)}
+function showQuestion(){answered=false;const item=queue[qi];$("worldLabel").textContent="ENGLISH LEVEL "+chosenLevel+" · GRAMMAR QUEST";$("progressLabel").textContent=`QUESTION ${qi+1}/${queue.length}`;$("streakLabel").textContent="STREAK ×"+streak;$("progressBar").style.width=(qi/queue.length*100)+"%";$("topic").textContent=item.topic.toUpperCase();$("levelBadge").textContent=chosenLevel+" CHALLENGE";$("feedback").classList.add("hidden");$("question").textContent=item.question;$("answers").innerHTML="";$("next").disabled=true;$("next").textContent=qi===queue.length-1?"VIEW RESULTS →":"NEXT QUESTION →";item.options.forEach((opt,i)=>{const b=document.createElement("button"),letter=document.createElement("span"),txt=document.createElement("span");letter.className="letter";letter.textContent=String.fromCharCode(65+i)+".";txt.textContent=opt;b.append(letter,txt);b.onclick=()=>answer(i);$("answers").appendChild(b)});runTimer()}
+function reveal(choice,timedOut=false){if(answered)return;answered=true;stopTimer();const item=queue[qi],buttons=$("answers").querySelectorAll("button");buttons.forEach((b,i)=>{b.disabled=true;if(i===item.answer)b.classList.add("correct");else if(i===choice)b.classList.add("wrong")});let pts=0;if(choice===item.answer&&!timedOut){correct++;streak++;pts=100+Math.min(streak,5)*10;earned+=pts;data.xp+=pts}else streak=0;$("streakLabel").textContent="STREAK ×"+streak;$("feedback").classList.remove("hidden");$("feedback").replaceChildren();const strong=document.createElement("strong");strong.textContent=timedOut?"⏰ Time's up!":choice===item.answer?"✓ Correct! +"+pts+" XP":"✕ Not quite.";const exp=document.createElement("p");exp.textContent=item.explanation;const ans=document.createElement("p");const label=document.createElement("strong");label.textContent="Correct answer: ";ans.append(label,document.createTextNode(String.fromCharCode(65+item.answer)+". "+item.options[item.answer]));$("feedback").append(strong,exp,ans);$("next").disabled=false;save()}
+function answer(i){reveal(i,false)}function timeoutQuestion(){reveal(-1,true)}
+function startRound(quick){
+ stopTimer();
+ chosenLevel=$("levelSelect").value;
+ timerSeconds=Number($("timerSelect").value)||20;
+ const requestedCount=quick?10:(Number($("countSelect").value)||10);
+ queue=[];
+ const seen=new Set();
+ let attempts=0;
+ const maxAttempts=requestedCount*250;
+ // Collect different question wordings before starting the round.
+ while(queue.length<requestedCount && attempts<maxAttempts){
+   attempts++;
+   const item=makeQuestion(chosenLevel);
+   const key=item.topic+"|"+item.question.trim().toLowerCase();
+   if(!seen.has(key)){
+     seen.add(key);
+     queue.push(item);
+   }
+ }
+ qi=0;correct=0;earned=0;streak=0;lastMode=quick?"quick":"standard";
+ if(queue.length===0){alert("No questions could be generated. Please try again.");renderHome();return;}
+ if(queue.length<requestedCount){
+   alert("This level currently has "+queue.length+" different question wordings available for this round, so the round will use those questions without repeating them.");
+ }
+ show("game");showQuestion();
+}
+function finish(){stopTimer();show("result");const pct=Math.round(correct/queue.length*100);data.rounds++;data.best=Math.max(data.best,pct);save();$("resultEyebrow").textContent=chosenLevel+" RESULTS";$("resultTitle").textContent=pct>=90?"Outstanding!":pct>=70?"Great progress!":"Keep practising!";$("resultMessage").textContent=`You scored ${pct}% at ${chosenLevel}. Start another round for a fresh set of questions.`;$("resultScore").textContent=correct+"/"+queue.length;$("resultXP").textContent="+"+earned;$("resultAccuracy").textContent=pct+"%";$("resultAdvice").textContent=pct>=90?"Excellent precision. Try another level when ready.":pct>=70?"Good work. Review the explanations and keep going.":"Read each explanation, then try again with a fresh round.";$("resultDetail").textContent=`Total XP: ${data.xp}. Rounds played: ${data.rounds}. Best accuracy: ${data.best}%.`}
+$("startLevel").onclick=()=>startRound(false);$("practice").onclick=()=>startRound(true);$("next").onclick=()=>{if(!answered)return;if(qi<queue.length-1){qi++;showQuestion()}else finish()};$("quit").onclick=()=>{stopTimer();renderHome()};$("resultHome").onclick=()=>{stopTimer();renderHome()};$("again").onclick=()=>startRound(lastMode==="quick");$("reset").onclick=()=>{if(confirm("Reset your XP, rounds played and best accuracy? This cannot be undone.")){stopTimer();data={xp:0,rounds:0,best:0};save();queue=[];qi=0;correct=0;earned=0;streak=0;renderHome()}};renderHome();
+</script></body></html>
